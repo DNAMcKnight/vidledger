@@ -1,5 +1,6 @@
 // import React from "react";
 import { FiMenu, FiSearch } from "react-icons/fi";
+import { Link } from "react-router-dom";
 import "./navbar.css";
 
 const Navbar = () => {
@@ -9,7 +10,7 @@ const Navbar = () => {
         <div className="menu-icon">
           <FiMenu />
         </div>
-        <div className="youtube">YouTube</div>
+        <Link to="/" className="vidledger">VidLedger</Link>
       </div>
 
       <div className="search">

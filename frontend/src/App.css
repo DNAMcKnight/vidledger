@@ -1,12 +1,8 @@
 .sidebar-menu {
   display: flex;
-  border: 1px solid #000000;
+  flex-shrink: 0;
 }
 
 .main-content {
   display: inline;
-}
-
-.devided {
-  display: flex;
 }

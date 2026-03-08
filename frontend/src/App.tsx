@@ -1,5 +1,6 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
+import "./App.css";
 import Navbar from "./components/navbar/navbar";
 import Sidebar from "./components/sidebar/sidebar";
 import Home from "./pages/home/home";
@@ -8,7 +9,7 @@ const App = () => {
   return (
     <div>
       <Navbar />
-      <div className="devided">
+      <div className="sidebar-menu">
         <Sidebar />
         <div className="main-content">
           <Routes>

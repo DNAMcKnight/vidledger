@@ -1,9 +1,13 @@
+import cors from "cors";
 import 'dotenv/config';
 import express from 'express';
 import mongoose from 'mongoose';
 
-
 const app = express();
+// app.use(cors({
+//     origin: "http://127.0.0.1:5173"
+// }));
+app.use(cors());
 const port = process.env.PORT || 3000;
 const uri = process.env.URI || ""
 
@@ -50,7 +54,6 @@ async function connectDB() {
     try {
         await mongoose.connect(uri);
         await mongoose.connection.db.admin().command({ ping: 1 });
-        console.log("Pinged your deployment. You successfully connected to MongoDB!");
         console.log("✅ MongoDB connected successfully!");
     } catch (err) {
         console.error("❌ MongoDB connection error:", err);
@@ -58,8 +61,6 @@ async function connectDB() {
     }
 }
 
-// Connect to DB before starting the server
-connectDB();
 
 app.get("/test", async (req, res) => {
     try {
@@ -105,17 +106,48 @@ app.get("/get-channels", async (req, res) => {
 });
 app.get("/get-videos", async (req, res) => {
     try {
-        // Find videos and sort by most recent publish date
-        const videos = await Video.find()
-            .sort({ publishedAt: -1 })
-            .limit(10);
+        const limit = req.query;
+        const limitNumber = limit ? parseInt(limit, 10) : 10;
+        const videos = await Video.aggregate([
+            {
+                $lookup: {
+                    from: "youtube_channels",
+                    localField: "channelId",
+                    foreignField: "channel_id",
+                    as: "channelInfo"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$channelInfo",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            { $sort: { publishedAt: -1 } },
+            { $limit: limitNumber }
+        ]);
 
         res.json(videos);
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: err.message });
     }
 });
 
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
-});
+async function startServer() {
+    try {
+        await mongoose.connect(uri);
+        await mongoose.connection.db.admin().command({ ping: 1 });
+        console.log("✅ MongoDB connected successfully!");
+
+        // Start server AFTER DB connection
+        app.listen(port, () => {
+            console.log(`Server running at http://localhost:${port}/`);
+        });
+    } catch (err) {
+        console.error("❌ MongoDB connection error:", err);
+        process.exit(1);
+    }
+}
+
+startServer();

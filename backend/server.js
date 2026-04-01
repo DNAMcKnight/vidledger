@@ -107,7 +107,7 @@ app.get("/get-channels", async (req, res) => {
 app.get("/get-videos", async (req, res) => {
     try {
         const limit = req.query;
-        const limitNumber = limit ? parseInt(limit, 10) : 10;
+        const limitNumber = Math.max(1, Math.min(50, parseInt(req.query.limit, 10) || 10));
         const videos = await Video.aggregate([
             {
                 $lookup: {
